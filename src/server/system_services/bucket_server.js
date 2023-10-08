@@ -395,7 +395,7 @@ async function put_bucket_logging(req) {
     dbg.log0('put_bucket_logging:', req.rpc_params);
     const bucket = find_bucket(req);
     const logging = {
-                        "name": req.rpc_params.name,
+                        "name": bucket.name,
                         "log_bucket": req.rpc_params.log_bucket,
                         "log_prefix": req.rpc_params.log_prefix
                     };
@@ -416,7 +416,7 @@ async function get_bucket_logging(req) {
     const bucket = find_bucket(req);
 
     const logging = {
-        "name": bucket.logging.name,
+        "name": bucket.name,
         "log_bucket": bucket.logging.log_bucket,
         "log_prefix": bucket.logging.log_prefix
     };
