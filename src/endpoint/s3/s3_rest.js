@@ -117,8 +117,6 @@ async function handle_request(req, res) {
     usage_report.s3_usage_info.total_calls += 1;
     usage_report.s3_usage_info[op_name] = (usage_report.s3_usage_info[op_name] || 0) + 1;
 
-
-
     if (req.query && req.query.versionId) {
         const caching = await req.object_sdk.read_bucket_sdk_caching_info(req.params.bucket);
         if (caching) {
