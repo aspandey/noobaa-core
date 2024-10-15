@@ -912,7 +912,7 @@ class ConfigFS {
      * list_buckets returns the array of buckets that exists under the config dir
      * @returns {Promise<string[]>} 
      */
-    async list_buckets() {
+    async list_buckets(params) {
         const bucket_entries = await nb_native().fs.readdir(this.fs_context, this.buckets_dir_path);
         const bucket_names = this._get_config_entries_names(bucket_entries, JSON_SUFFIX);
         return bucket_names;

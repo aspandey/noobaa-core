@@ -550,7 +550,6 @@ mocha.describe('Session token tests', function() {
             secretAccessKey: result_obj.secret_key,
             sessionToken: result_obj.session_token
         });
-
         const buckets1 = await temp_s3_with_session_token.listBuckets().promise();
         assert.ok(buckets1.Buckets.length > 0);
     });

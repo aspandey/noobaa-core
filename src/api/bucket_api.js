@@ -388,6 +388,19 @@ module.exports = {
 
         list_buckets: {
             method: 'GET',
+            params: {
+                type: 'object',
+                properties: {
+                    continuation_token: {
+                        type: 'string'
+                    },
+                    max_buckets: {
+                        type: 'integer',
+                        minimum: 1,
+                        maximum: 1000
+                    }
+                }
+            },
             reply: {
                 type: 'object',
                 required: ['buckets'],
@@ -401,9 +414,12 @@ module.exports = {
                                 name: { $ref: 'common_api#/definitions/bucket_name' },
                                 creation_date: {
                                     idate: true
-                                },
+                                }
                             }
                         }
+                    },
+                    continuation_token: {
+                        type: 'string'
                     }
                 }
             },

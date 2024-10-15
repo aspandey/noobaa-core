@@ -192,10 +192,10 @@ class BucketSpaceFS extends BucketSpaceSimpleFS {
      * @param {nb.ObjectSDK} object_sdk
      * @returns {Promise<object>}
      */
-    async list_buckets(object_sdk) {
+    async list_buckets(params, object_sdk) {
         let bucket_names;
         try {
-            bucket_names = await this.config_fs.list_buckets();
+            bucket_names = await this.config_fs.list_buckets(params);
         } catch (err) {
             if (err.code === 'ENOENT') {
                 dbg.error('BucketSpaceFS: root dir not found', err, this.config_fs.buckets_dir_path);

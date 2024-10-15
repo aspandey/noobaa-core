@@ -972,19 +972,65 @@ async function delete_bucket_lifecycle(req) {
  * LIST_BUCKETS
  *
  */
+
 async function list_buckets(req) {
-    const buckets_by_name = _.filter(
-        req.system.buckets_by_name,
-        async bucket => await req.has_s3_bucket_permission(bucket, "s3:ListBucket", req) && !bucket.deleting
-    );
-    return {
-        buckets: _.map(buckets_by_name, function(bucket) {
-            return {
-                name: bucket.name,
-                creation_date: bucket._id.getTimestamp().getTime()
-            };
-        })
-    };
+
+    const accessible_bucket_list = [];
+    const paged_bucket_list = [];
+    let next_index = 0;
+    let is_truncated = false;
+    const all_buckets = _.values(req.system.buckets_by_name);
+
+    let continuation_token = req.rpc_params?.continuation_token;
+    const max_buckets = req.rpc_params?.max_buckets;
+
+    dbg.error("max_buckets:", max_buckets, "continuation_token:", continuation_token);
+
+    for (const bucket of all_buckets) {
+        if (await req.has_s3_bucket_permission(bucket, "s3:ListBucket", req) && !bucket.deleting) {
+            accessible_bucket_list.push(bucket);
+        }
+    }
+    if (!max_buckets) {
+        const buckets = _.map(accessible_bucket_list, b => ({
+            name: b.name,
+            creation_date: b._id.getTimestamp().getTime()
+        }));
+        return {
+            buckets,
+        };
+    }
+    accessible_bucket_list.sort((a, b) => a._id.getTimestamp().getTime() - b._id.getTimestamp().getTime());
+    if (continuation_token) {
+        let i = 0;
+        for (i = 0; i < accessible_bucket_list.length; i++) {
+            if (accessible_bucket_list[i]._id.toString() === continuation_token) {
+                break;
+            }
+        }
+        next_index = i;
+    }
+
+    for (let i = next_index; (i < accessible_bucket_list.length && i < next_index + max_buckets); i++) {
+            paged_bucket_list.push(accessible_bucket_list[i]);
+    }
+    const buckets = _.map(paged_bucket_list, bucket => ({
+        name: bucket.name,
+        creation_date: bucket._id.getTimestamp().getTime()
+    }));
+
+    is_truncated = accessible_bucket_list.length > next_index + max_buckets;
+    continuation_token = is_truncated ? accessible_bucket_list[next_index + max_buckets]._id.toString() : undefined;
+    if (continuation_token) {
+        return {
+            buckets,
+            continuation_token,
+        };
+    } else {
+        return {
+            buckets,
+        };
+    }
 }
 
 
